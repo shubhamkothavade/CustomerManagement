@@ -1,0 +1,66 @@
+/* Full-screen background */
+body {
+    margin: 0;
+    padding: 0;
+    background: url('https://mrwallpaper.com/images/hd/professional-chartered-accountant-reviewing-audit-f6uh44v2f6on8zlr.jpg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    opacity: 0.9;
+}
+/* Center the login box */
+.login-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Transparent box with blur effect */
+.login-box {
+    background-color: rgba(255, 255, 255, 0.1); /* transparent white */
+    padding: 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(1000px);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+    color: #fff;
+    border: 1px solid black;
+}
+
+.login-header img.logo-img {
+    width: 60px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.login-header h2 {
+    font-size: 22px; /* Slightly larger for emphasis */
+    font-weight: 1000; /* Bold */
+    color: #111; /* Darker than just 'black' */
+    text-transform: uppercase; /* Optional: Makes it look more professional */
+    letter-spacing: 1px; /* Optional: Adds slight spacing for clarity */
+}
+
+/* Input styling */
+input.form-control {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid #ccc;
+    color: #fff;
+}
+
+    input.form-control::placeholder {
+        color: #eee;
+    }
+
+label {
+    color: black;
+}
+
+.btn-container .btn {
+    width: 120px;
+    margin: 0 10px;
+}
+
+ 
+ 

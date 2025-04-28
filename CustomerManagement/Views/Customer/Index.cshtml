@@ -1,0 +1,667 @@
+﻿@model IEnumerable<CustomerManagement.Models.Customer>
+
+@using CustomerManagement.Models
+
+@{
+    ViewData["Title"] = "Customer List";
+}
+
+<style>
+    :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --secondary: #3f37c9;
+        --success: #4cc9f0;
+        --danger: #f72585;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #333;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Card styles */
+    .card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: none;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .card-header {
+        background: linear-gradient(to right, #0d6efd, black);
+        border: none;
+        box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    /* Search and action bar */
+    .action-bar {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        position: relative;
+        min-width: 250px;
+    }
+
+        .search-box input {
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--light-gray);
+            width: 100%;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+            .search-box input:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+                outline: none;
+            }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+    }
+
+    /* Button styles */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+    .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-view {
+        background-color: var(--success);
+        color: black;
+    }
+
+    .btn-edit {
+        background-color: var(--primary);
+        color: black;
+    }
+
+    .btn-delete {
+        background-color: var(--danger);
+        color: black;
+    }
+
+    /* Table styles */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 0;
+    }
+
+        .table th {
+            background-color: #f8fafc;
+            color: var(--dark);
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.03);
+    }
+
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Error list */
+    .error-list {
+        color: var(--danger);
+        padding: 1rem;
+        background-color: rgba(247, 37, 133, 0.1);
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        list-style-position: inside;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 12px;
+        width: 150%;
+        max-width: 1000px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+    }
+
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--gray);
+        transition: var(--transition);
+    }
+
+        .close-modal:hover {
+            color: var(--dark);
+            transform: rotate(90deg);
+        }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    /* Form styles */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--light-gray);
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        font-size: 0.9rem;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+            outline: none;
+        }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--light-gray);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .btn-secondary {
+        background-color: white;
+        color: var(--gray);
+        border: 1px solid var(--light-gray);
+    }
+
+        .btn-secondary:hover {
+            background-color: #f8f9fa;
+        }
+
+    .validation-error {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .action-bar {
+            width: 100%;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .action-btns {
+            flex-wrap: wrap;
+        }
+
+        .modal-content {
+            width: 95%;
+        }
+    }
+
+    /* Status badges */
+    .badge {
+        display: inline-block;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 50px;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(to right, #0d6efd, black);
+        border: none;
+        box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+    }
+    /* Loading spinner */
+    .spinner {
+        display: inline-block;
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<div class="container">
+    @if (ViewBag.Errors != null)
+    {
+        <ul class="error-list">
+            @foreach (var error in ViewBag.Errors as List<string>)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    }
+    <div class="d-flex justify-content-between align-items-center mb-4">
+         <h3 class="mb-0 text-primary">
+            @* <i class=" fas fa-file-invoice-dollar me-2 "></i>  *@
+        </h3>
+        <button class="btn btn-primary btn-gradient" id="openAddCustomerModal">
+            <i class="fas fa-plus"></i> Add Customer
+        </button>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Customer List</h2> 
+            <div class="action-bar">
+               
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search customers...">
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer Name</th>
+                        <th>Contact Person</th>
+                        <th>Mobile No</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTableBody">
+                    @foreach (Customer customer in Model)
+                    {
+                        <tr>
+                            <td>@customer.Id</td>
+                            <td>
+                                <strong>@customer.CustomerName</strong>
+                                 
+                            </td>
+                            <td>@customer.ContactPerson</td>
+                            <td>@customer.MobileNo</td>
+                            <td>
+                                <div class="action-btns">
+                                    <a href="@Url.Action("Details", "Customer", new { id = customer.Id })"
+                                       class="btn btn-sm btn-view">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Customer", new { id = customer.Id })"
+                                       class="btn btn-sm btn-edit">
+                                        <i class="fas fa-pencil-alt"></i> Edit
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Customer", new { id = customer.Id })"
+                                       class="btn btn-sm btn-delete">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal-overlay" id="addCustomerModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Customer</h3>
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+
+        <form id="customerForm" method="post" class="modal-body">
+            <div class="form-group">
+                <label class="form-label" for="CustomerName">Customer Name *</label>
+                <input type="text" class="form-control" id="CustomerName" name="CustomerName" required>
+                <div class="validation-error" id="CustomerNameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="ContactPerson">Contact Person *</label>
+                <input type="text" class="form-control" id="ContactPerson" name="ContactPerson" required>
+                <div class="validation-error" id="ContactPersonError"></div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="PhoneNo">Phone No</label>
+                        <input type="tel" class="form-control" id="PhoneNo" name="PhoneNo" maxlength="10" pattern="\d{10}">
+                        <div class="validation-error" id="PhoneNoError"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="MobileNo">Mobile No *</label>
+                        <input type="tel" class="form-control" id="MobileNo" name="MobileNo" required maxlength="10" pattern="\d{10}">
+                        <div class="validation-error" id="MobileNoError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="Address1">Address Line 1 *</label>
+                <input type="text" class="form-control" id="Address1" name="Address1" required>
+                <div class="validation-error" id="Address1Error"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="Address2">Address Line 2</label>
+                <input type="text" class="form-control" id="Address2" name="Address2">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="Service">Service Details</label>
+                <textarea class="form-control" id="Service" name="Service" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="Notes">Notes</label>
+                <textarea class="form-control" id="Notes" name="Notes" rows="2"></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="PanCardNo">PAN Card No</label>
+                        <input type="text" class="form-control" id="PanCardNo" name="PanCardNo" oninput="validatePanCard()" placeholder="ABCDE1234F">
+                        <div class="validation-error" id="PanCardNoError"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="GSTNO">GST No</label>
+                        <input type="text" class="form-control" id="GSTNO" name="GSTNO">
+                        <div class="validation-error" id="GSTNOError"></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="form-footer">
+            <button type="button" class="btn btn-secondary" id="cancelAddCustomer">Cancel</button>
+            <button type="submit" form="customerForm" class="btn btn-primary" id="submitCustomer">
+                <span id="submitText">Add Customer</span>
+                <span id="submitSpinner" class="spinner" style="display: none;"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Modal functionality
+            const modal = $('#addCustomerModal');
+
+            $('#openAddCustomerModal').click(function() {
+                modal.fadeIn().addClass('show');
+                $('body').css('overflow', 'hidden');
+            });
+
+            $('#closeModal, #cancelAddCustomer').click(function() {
+                modal.fadeOut().removeClass('show');
+                $('body').css('overflow', 'auto');
+            });
+
+            // Close when clicking outside modal
+            $(document).mouseup(function(e) {
+                if (!$(e.target).closest('.modal-content').length && modal.is(':visible')) {
+                    modal.fadeOut().removeClass('show');
+                    $('body').css('overflow', 'auto');
+                }
+            });
+
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                const value = $(this).val().toLowerCase();
+                $('#customerTableBody tr').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
+
+            // Form submission with AJAX
+            $('#customerForm').on('submit', function(e) {
+                e.preventDefault();
+
+                const submitBtn = $('#submitCustomer');
+                const submitText = $('#submitText');
+                const spinner = $('#submitSpinner');
+
+                // Show loading state
+                submitText.text('Processing...');
+                spinner.show();
+                submitBtn.prop('disabled', true);
+
+                // Clear previous errors
+                $('.validation-error').text('');
+
+                $.ajax({
+                    url: '@Url.Action("Create", "Customer")',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            // Success - reload page
+                            window.location.reload();
+                        } else {
+                            // Show validation errors
+                            if (response.errors) {
+                                for (const [key, value] of Object.entries(response.errors)) {
+                                    $(`#${key}Error`).text(value.join(', '));
+                                }
+                            } else if (response.message) {
+                                alert(response.message);
+                            }
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('An error occurred while processing your request.');
+                    },
+                    complete: function() {
+                        // Reset button state
+                        submitText.text('Add Customer');
+                        spinner.hide();
+                        submitBtn.prop('disabled', false);
+                    }
+                });
+            });
+
+            // PAN card validation
+            window.validatePanCard = function() {
+                const panInput = $('#PanCardNo');
+                const errorDiv = $('#PanCardNoError');
+                const panValue = panInput.val().trim().toUpperCase();
+                const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
+                panInput.val(panValue);
+
+                if (panValue === "") {
+                    errorDiv.text('');
+                } else if (!panRegex.test(panValue)) {
+                    errorDiv.text('Please enter a valid PAN card number (format: ABCDE1234F)');
+                } else {
+                    errorDiv.text('');
+                }
+            }
+        });
+    </script>
+}

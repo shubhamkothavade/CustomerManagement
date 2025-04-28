@@ -1,0 +1,89 @@
+﻿@model CustomerManagement.Models.Customer
+
+@{
+    ViewData["Title"] = "Edit Customer";
+}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7fc;
+        background-image: url('https://img.freepik.com/free-vector/simple-blue-gradient-background-vector-business_53876-161578.jpg?semt=ais_hybrid&w=740');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        opacity: 0.9;
+    }
+</style>
+<div class="container mt-5">
+    <div class="card shadow-lg rounded-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Edit Customer</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="CustomerName" class="form-label">Customer Name</label>
+                        <input asp-for="CustomerName" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNo" class="form-label">Phone No</label>
+                        <input asp-for="PhoneNo" class="form-control" maxlength="10" pattern="\d{10}" title="Enter a valid 10-digit number" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ContactPerson" class="form-label">Contact Person</label>
+                        <input asp-for="ContactPerson" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="MobileNo" class="form-label">Mobile No</label>
+                        <input asp-for="MobileNo" class="form-control" maxlength="10" pattern="\d{10}" title="Enter a valid 10-digit number" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Address1" class="form-label">Address 1</label>
+                        <input asp-for="Address1" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Address2" class="form-label">Address 2</label>
+                        <input asp-for="Address2" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Service" class="form-label">Service</label>
+                        <input asp-for="Service" class="form-control" />
+                    </div>
+                  
+                    <div class="col-md-4">
+                        <label asp-for="PanCardNo" class="form-label">PanCard No</label>
+                        <input asp-for="PanCardNo" class="form-control" id="PanCardNo"
+                               pattern="^[A-Z]{5}[0-9]{4}[A-Z]{1}$" title="Enter a valid Pan Card number (e.g., ABCDE1234F)"
+                               required />
+                        <div class="invalid-feedback" id="PanCardError" style="display: none;">Please enter a valid Pan Card number (e.g., ABCDE1234F).</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="GSTNO" class="form-label">GST NO</label>
+                        <input asp-for="GSTNO" class="form-control" />
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label asp-for="Notes" class="form-label">Notes</label>
+                        <input asp-for="Notes" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="submit" class="btn btn-success px-4">Update</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+ 

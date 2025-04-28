@@ -1,0 +1,247 @@
+﻿@model CustomerManagement.Models.Customer
+@{
+    ViewData["Title"] = "Add New Customer";
+    Layout = null;
+    <!-- This removes any layout including sidebar -->
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 50px;
+            color: #333;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #2c3e50;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+            .form-group label {
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+        }
+
+            .form-control:focus {
+                border-color: #5470c6;
+                outline: none;
+            }
+
+        textarea.form-control {
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit {
+            background-color: #4361ee;
+            color: white;
+        }
+
+            .btn-submit:hover {
+                background-color: #3f37c9;
+            }
+
+        .btn-reset {
+            background-color: #e0e0e0;
+            color: #555;
+        }
+
+            .btn-reset:hover {
+                background-color: #b3b3b3;
+            }
+
+        .error-list {
+            color: #f72585;
+            padding-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .validation-error {
+            color: #f72585;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        @@media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        @if (ViewBag.Errors != null)
+        {
+            <ul class="error-list">
+                @foreach (var error in ViewBag.Errors as List<string>)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        }
+
+        <h2 class="form-title">Add New Customer</h2>
+
+        <form asp-action="Create" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="CustomerName">Customer Name</label>
+                    <input asp-for="CustomerName" class="form-control" required />
+                    <span asp-validation-for="CustomerName" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="PhoneNo">Phone No</label>
+                    <input asp-for="PhoneNo" class="form-control" maxlength="10" pattern="\d{10}"
+                           title="Enter a valid 10-digit phone number" required />
+                    <span asp-validation-for="PhoneNo" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ContactPerson">Contact Person</label>
+                    <input asp-for="ContactPerson" class="form-control" required />
+                    <span asp-validation-for="ContactPerson" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MobileNo">Mobile No</label>
+                    <input asp-for="MobileNo" class="form-control" maxlength="10" pattern="\d{10}"
+                           title="Enter a valid 10-digit mobile number" required />
+                    <span asp-validation-for="MobileNo" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Address1">Address 1</label>
+                    <input asp-for="Address1" class="form-control" required />
+                    <span asp-validation-for="Address1" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Address2">Address 2</label>
+                    <input asp-for="Address2" class="form-control" />
+                    <span asp-validation-for="Address2" class="validation-error"></span>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label asp-for="Service">Service</label>
+                    <textarea asp-for="Service" class="form-control"></textarea>
+                    <span asp-validation-for="Service" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="PanCardNo">Pan Card No</label>
+                    <input asp-for="PanCardNo" class="form-control" required
+                           oninput="validatePanCard()" onblur="validatePanCard()" />
+                    <span asp-validation-for="PanCardNo" class="validation-error"></span>
+                    <div id="PancardError" class="validation-error" style="display: none;">
+                        Invalid Pan Card Number. It should follow the pattern: ABCDE0000F
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GSTNO">GST NO</label>
+                    <input asp-for="GSTNO" class="form-control" />
+                    <span asp-validation-for="GSTNO" class="validation-error"></span>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label asp-for="Notes">Notes</label>
+                    <textarea asp-for="Notes" rows="3" class="form-control"></textarea>
+                    <span asp-validation-for="Notes" class="validation-error"></span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit">Submit</button>
+                <button type="reset" class="btn btn-reset">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        function validatePanCard() {
+            const panInput = document.getElementById('PanCardNo');
+            const errorDiv = document.getElementById('PancardError');
+            const panValue = panInput.value.trim().toUpperCase();
+            const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
+            panInput.value = panValue; // Auto uppercase
+            if (panValue === "") {
+                errorDiv.style.display = "none";
+            } else if (!panRegex.test(panValue)) {
+                errorDiv.style.display = "block";
+            } else {
+                errorDiv.style.display = "none";
+            }
+        }
+
+        // Handle form submission for modal scenario
+        function onFormSuccess() {
+            if (window.parent && window.parent.closeCustomerModal) {
+                window.parent.closeCustomerModal();
+                window.parent.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

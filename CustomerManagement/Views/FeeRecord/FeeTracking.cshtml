@@ -1,0 +1,637 @@
+﻿@{
+    ViewBag.Title = "Fee Tracking";
+    var summaries = ViewBag.FeeSummaryList as List<CustomerManagement.Models.FeeSummaryViewModel>;
+    var years = ViewBag.FinancialYears as List<string>;
+    var customers = ViewBag.Customers as List<CustomerManagement.Models.Customer>;
+}
+
+<style>
+    .avatar-sm {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-title {
+        font-size: 1rem;
+    }
+
+    .bg-primary-light {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+
+    .bg-danger-light {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .bg-success-light {
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+
+    .btn-gradient {
+        background: linear-gradient(to right, #0d6efd, black);
+        border: none;
+        box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+    }
+     
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .search-box .input-group-text {
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+        padding-left: 15px;
+    }
+
+    .search-box .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .search-box .btn {
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+        padding-right: 15px;
+    }
+
+    .search-box .form-control:focus {
+        box-shadow: none;
+    }
+</style>
+<style>
+    /* Custom color palette */
+    :root {
+        --deep-indigo: #2a4365; /* Header background */
+        --violet: #4c51bf; /* Accent color */
+        --gray-dark: #4a5568; /* Text color */
+        --gray-medium: #718096; /* Secondary text */
+        --gray-light: #cbd5e0; /* Borders */
+        --gray-ultralight: #f7fafc; /* Footer background */
+    }
+
+    .modal-content {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .form-select, .form-control {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+    /* Input focus states */
+    .form-select:focus, .form-control:focus {
+        border-color: #4c51bf;
+        box-shadow: 0 0 0 0.25rem rgba(76, 81, 191, 0.25);
+    }
+</style>
+
+<div class="container-fluid px-0">
+    <!-- Header with Add Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0 text-primary">
+            @* <i class="fas fa-file-invoice-dollar me-2"></i> Fee Management *@
+        </h3>
+        <button type="button"  class="btn btn-primary btn-gradient" data-bs-toggle="modal" data-bs-target="#addFeesModal">
+            <i class="fas fa-plus-circle me-2"></i> Add New Fees
+        </button>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="card border-0 shadow-lg">
+        <div class="card-header btn btn-primary btn-gradient text-white py-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h4 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Fee Summary</h4>
+                <div class="search-box">
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <span class="input-group-text bg-white text-primary border-0">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control border-0 shadow-none"
+                               placeholder="Search customer..."
+                               id="customerSearch"
+                               oninput="filterCustomers()">
+                        <button class="btn btn-white text-primary" type="button" onclick="clearSearch()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            @if (summaries != null && summaries.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light bg-gradient">
+                            <tr>
+                                <th class="ps-4">Customer</th>
+                                <th>Financial Year</th>
+                                <th class="text-end">Total Fees</th>
+                                <th class="text-end">Paid</th>
+                                <th class="text-end">Balance</th>
+                                <th class="text-center pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in summaries)
+                            {
+                                <tr class="border-top">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3">
+                                                <span class="avatar-title bg-primary-light rounded-circle text-primary">
+                                                    <i class="fas fa-user"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">@item.CustomerName</h6>
+                                                 
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary-light text-primary fs-6 py-2 px-3">@item.FinancialYear</span>
+                                    </td>
+                                    <td class="text-end fw-bold">₹@item.TotalFees.ToString("N2")</td>
+                                    <td class="text-end text-success">
+                                        <i class="fas fa-check-circle me-1"></i>₹@item.FeesPaid.ToString("N2")
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge @(item.Balance > 0 ? "bg-danger-light text-danger" : "bg-success-light text-success") rounded-pill fs-6 py-2 px-3">
+                                            <i class="fas @(item.Balance > 0 ? "fa-exclamation-circle" : "fa-check-circle") me-2"></i>
+                                            ₹@item.Balance.ToString("N2")
+                                        </span>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <!-- Edit Button -->
+                                            <button class="btn btn-sm btn-icon btn-outline-primary rounded-circle"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editModal"
+                                                    data-id="@item.FeeRecordId"
+                                                    data-customername="@item.CustomerName"
+                                                    data-totalfees="@item.TotalFees"
+                                                    title="Edit Fee Record">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </button>
+
+                                            <!-- Collect Button -->
+                                            <button class="btn btn-sm btn-icon btn-outline-success rounded-circle"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#collectModal"
+                                                    data-id="@item.FeeRecordId"
+                                                    data-customername="@item.CustomerName"
+                                                    data-financialyear="@item.FinancialYear"
+                                                    data-balance="@item.Balance"
+                                                    title="Collect Fees">
+                                                <i class="fas fa-hand-holding-usd"></i>
+                                            </button>
+
+                                            <!-- Details Button -->
+                                            <button type="button" class="btn btn-sm btn-icon btn-outline-info rounded-circle"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#feesPaidModal"
+                                                    data-customerid="@item.MasterCustomerId"
+                                                    data-customername="@item.CustomerName"
+                                                    data-financialyear="@item.FinancialYear"
+                                                    title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-file-invoice-dollar fa-4x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted">No fee records found</h5>
+                    <p class="text-muted">Click the "Add New Fees" button to create your first fee record</p>
+                    <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addFeesModal">
+                        <i class="fas fa-plus me-2"></i> Add Fees
+                    </button>
+                </div>
+            }
+        </div>
+
+        @if (summaries != null && summaries.Any())
+        {
+            <div class="card-footer bg-light">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <span class="me-2 text-muted">Showing</span>
+                            <select class="form-select form-select-sm w-auto">
+                                <option>10</option>
+                                <option selected>25</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                            <span class="ms-2 text-muted">entries</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-end">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<!-- Add Fees Modal -->
+<div class="modal fade" id="addFeesModal" tabindex="-1" aria-labelledby="addFeesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <form asp-action="AddFees" method="post">
+                <div class="modal-header" style="background-color: #2a4365; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div class="w-100 text-center position-relative">
+                        <h5 class="modal-title fs-4 fw-bold text-white">
+                            <i class="fas fa-file-invoice-dollar me-2"></i>Add New Fees
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white position-absolute end-0 top-50 translate-middle-y me-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="form-group mb-4">
+                        <label for="masterCustomerId" class="form-label fw-semibold mb-2" style="color: #4a5568;">Select Customer</label>
+                        <select class="form-select py-2" name="masterCustomerId" required style="border-color: #cbd5e0; border-radius: 8px;">
+                            <option value="" selected disabled>-- Select Customer --</option>
+                            @if (ViewBag.Customers != null)
+                            {
+                                @foreach (var customer in ViewBag.Customers as List<CustomerManagement.Models.Customer>)
+                                {
+                                    <option value="@customer.MasterCustomerId">@customer.CustomerName</option>
+                                }
+                            }
+                        </select>
+                        <div class="form-text mt-1 d-flex align-items-center" style="color: #718096;">
+                            <i class="fas fa-info-circle me-2" style="color: #4c51bf;"></i>
+                            Select customer from the dropdown
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="financialYear" class="form-label fw-semibold mb-2" style="color: #4a5568;">Financial Year</label>
+                        <select name="financialYear" class="form-select py-2" required style="border-color: #cbd5e0; border-radius: 8px;">
+                            <option value="" selected disabled>-- Select Year --</option>
+                            @if (ViewBag.FinancialYears != null)
+                            {
+                                @foreach (var y in ViewBag.FinancialYears as List<string>)
+                                {
+                                    <option value="@y">@y</option>
+                                }
+                            }
+                        </select>
+                        <div class="form-text mt-1 d-flex align-items-center" style="color: #718096;">
+                            <i class="fas fa-calendar-alt me-2" style="color: #4c51bf;"></i>
+                            Select applicable financial year
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="totalFees" class="form-label fw-semibold mb-2" style="color: #4a5568;">Total Fees Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white" style="border-color: #cbd5e0; border-right: none;">
+                                <i class="fas fa-rupee-sign" style="color: #4c51bf;"></i>
+                            </span>
+                            <input type="number" step="0.01" name="totalFees" class="form-control py-2" placeholder="0.00" required style="border-color: #cbd5e0; border-left: none; border-radius: 0 8px 8px 0;">
+                        </div>
+                        <div class="form-text mt-1 d-flex align-items-center" style="color: #718096;">
+                            <i class="fas fa-keyboard me-2" style="color: #4c51bf;"></i>
+                            Enter total fees amount in INR
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-gray-50 rounded-bottom p-4" style="background-color: #f7fafc;">
+                    <button type="button" class="btn btn-outline-gray px-4" data-bs-dismiss="modal" style="border-color: #cbd5e0; color: #4a5568;">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn px-4 shadow-sm" style="background-color: #4c51bf; color: white;">
+                        <i class="fas fa-check-circle me-2"></i>Add Fees
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+ 
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="EditFeeRecord" asp-controller="FeeRecord" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Fees</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Hidden field for FeeRecordId -->
+                    <input type="hidden" id="editFeeRecordId" name="feeRecordId" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Customer Name</label>
+                        <input type="text" id="editCustomerName" class="form-control" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Total Fees</label>
+                        <input type="number" id="editTotalFees" name="totalFees" step="0.01" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Collect Fees Modal -->
+<div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CollectFees" asp-controller="FeeRecord" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="collectModalLabel">Collect Fees</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" id="collectFeeRecordId" name="FeeRecordId" />
+                    <input type="hidden" id="collectCustomerId" name="CustomerId" />
+                    <input type="hidden" id="collectFinancialYear" name="FinancialYear" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Customer Name</label>
+                        <input type="text" id="collectCustomerName" class="form-control" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Balance</label>
+                        <input type="text" id="collectBalance" class="form-control" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fees Collected</label>
+                        <input type="number" name="FeesPaid" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Date</label>
+                        <input type="date" name="PaidOn" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Fee Paid Details -->
+<div class="modal fade" id="feesPaidModal" tabindex="-1" aria-labelledby="feesPaidModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feesPaidModalLabel">Fees Paid Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Customer:</strong> <span id="feesPaidCustomerName"></span></p>
+
+                <div class="mb-3 d-flex align-items-center">
+                    <label for="feesPaidYearSelect" class="form-label me-2 mb-0" style="white-space: nowrap;">Financial Year</label>
+                    <select class="form-select w-auto" style="width=15px" id="feesPaidYearSelect">
+                    </select>
+                </div>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Fees Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feesPaidTableBody">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+<script>
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+<!-- Edit Model Script -->
+<script>
+    var editModal = document.getElementById('editModal');
+    editModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+
+        // Get data attributes from the clicked button
+        var feeRecordId = button.getAttribute('data-id');
+        var customerName = button.getAttribute('data-customername');
+        var totalFees = button.getAttribute('data-totalfees');
+
+        // Fill modal fields
+        editModal.querySelector('#editFeeRecordId').value = feeRecordId;
+        editModal.querySelector('#editCustomerName').value = customerName;
+        editModal.querySelector('#editTotalFees').value = totalFees;
+    });
+</script>
+<!-- Collect Model Script -->
+<script>
+        var collectModal = document.getElementById('collectModal');
+    collectModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+
+        // Get data attributes from the clicked button
+        var feeRecordId = button.getAttribute('data-id');
+        var customerName = button.getAttribute('data-customername');
+        var financialYear = button.getAttribute('data-financialyear');
+        var balance = button.getAttribute('data-balance');
+
+        // Fill modal fields
+        collectModal.querySelector('#collectFeeRecordId').value = feeRecordId;
+        collectModal.querySelector('#collectCustomerName').value = customerName;
+        collectModal.querySelector('#collectBalance').value = balance;
+        collectModal.querySelector('#collectFinancialYear').value = financialYear;
+    });
+</script>
+<script>
+    var feesPaidModal = document.getElementById('feesPaidModal');
+    feesPaidModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+
+        var customerName = button.getAttribute('data-customername');
+        var financialYear = button.getAttribute('data-financialyear');
+        var customerId = button.getAttribute('data-customerid');
+
+        document.getElementById('feesPaidCustomerName').textContent = customerName;
+
+        var yearSelect = document.getElementById('feesPaidYearSelect');
+        yearSelect.innerHTML = '';
+
+        var option = document.createElement('option');
+        option.value = financialYear;
+        option.textContent = financialYear;
+        yearSelect.appendChild(option);
+
+        loadFeeHistory(customerId, financialYear);
+
+        yearSelect.onchange = function () {
+            loadFeeHistory(customerId, yearSelect.value);
+        };
+    });
+
+    function loadFeeHistory(masterCustomerId, financialYear) {
+        fetch(`/FeeRecord/GetFeeHistories?masterCustomerId=${masterCustomerId}&financialYear=${financialYear}`)
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('feesPaidTableBody');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="2" class="text-center">No records found</td>`;
+                    tbody.appendChild(row);
+                } else {
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `<td>${item.date}</td><td>${item.amount}</td>`;
+                        tbody.appendChild(row);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching fee histories:', error);
+            });
+    }
+</script>
+<script>
+    function filterCustomers() {
+        const input = document.getElementById('customerSearch');
+        const filter = input.value.toUpperCase();
+        const table = document.querySelector('.table');
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const customerCell = row.querySelector('td:first-child h6');
+            if (customerCell) {
+                const txtValue = customerCell.textContent || customerCell.innerText;
+                row.style.display = txtValue.toUpperCase().includes(filter) ? '' : 'none';
+            }
+        });
+    }
+
+    function clearSearch() {
+        document.getElementById('customerSearch').value = '';
+        filterCustomers();
+    }
+</script>
